@@ -76,20 +76,25 @@
 
 ;;;###autoload
 (defun pyenv-virtualenv-with-root ()
-  (let* ((virtualenv-name (pyenv-version))
-         (virtualenv-root (pyenv-virtualenv-root virtualenv-name)))
-    (cons virtualenv-name virtualenv-root)))
+  (let* ((virtualenv-names (pyenv-versions))
+         (virtualenv-root ))
+    (mapcar (lambda (v)
+              (cons v (pyenv-virtualenv-root v)))
+            virtualenv-names)))
 
 ;;;###autoload
 (defun pyenv-activate ()
   (require 'tramp)
-  (when-let ((result (pyenv-virtualenv-with-root))
+  (when-let ((all-versions (pyenv-virtualenv-with-root))
+             (result (car all-versions))
              (virtualenv-name (car result))
              (virtualenv-root (cdr result))
              (virtualenv-bin (pyenv-virtualenv-bin)))
     (pythonic-activate virtualenv-root)
-    (setq-local exec-path (cons virtualenv-root (remove virtualenv-bin exec-path))
-                tramp-remote-path (cons virtualenv-root (remove virtualenv-bin tramp-remote-path)))
+    (dolist (v (reverse all-versions))
+      (let ((bin (pyenv-virtualenv-bin (cdr v))))
+        (setq-local exec-path (cons bin (remove bin exec-path)))))
+    (setq-local tramp-remote-path (cons virtualenv-bin (remove virtualenv-bin tramp-remote-path)))
     (setq mode-name (concat mode-name (format "[%s]" virtualenv-name)))))
 
 (provide 'pyenv)
