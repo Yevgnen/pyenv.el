@@ -95,7 +95,7 @@
       (let ((bin (pyenv-virtualenv-bin (cdr v))))
         (setq-local exec-path (cons bin (remove bin exec-path)))))
     (setq-local tramp-remote-path (cons virtualenv-bin (remove virtualenv-bin tramp-remote-path)))
-    (setq mode-name (concat mode-name (format "[%s]" virtualenv-name)))))
+    (message "Switch to virtualenv: %s" virtualenv-name)))
 
 (provide 'pyenv)
 
